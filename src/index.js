@@ -28,13 +28,17 @@ app.listen(port, () => {
     console.log(`Server is listening on ${port}`)
 });
 
-const pet = {
-    name: 'Louie'
+const Task = require('./models/task');
+const User = require('./models/user');
+
+const main = async () => {
+    // const task = await Task.findById('5c906071a3023d2e60a79a7c');
+    // await task.populate('owner').execPopulate();
+    // console.log(task);
+
+    const user = await User.findById('5c906f670fa2cf46c4f5cfed');
+    await user.populate('tasks').execPopulate();
+    console.log(user.tasks);
 }
 
-pet.toJSON = function () {
-    console.log(this);
-    return  this;
-}
-
-console.log(JSON.stringify(pet));
+main();
