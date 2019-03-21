@@ -5,7 +5,15 @@ const auth = require('../middleware/auth');
 const User = require('../models/user');
 
 const upload = multer({
-    dest: 'avatar'
+    limits: {
+        fileSize: 1000000
+    },
+    fileFilter(req, file, cb) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+            cb(new Error('Please upload valid image type'))
+        }
+        cb(undefined, true); 
+    }
 });
 
 router.post('/users', async (req, res) => {
@@ -94,9 +102,19 @@ router.delete('/users/me', auth, async (req, res) => {
 
 
 
-router.post('/users/me/avatar', upload.single('avatar'), (req, res) => {
+router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) => {
+    req.user.avatar = req.file.buffer;
+    await req.user.save();
     res.send();
+}, (error, req, res, next) => {
+    res.status(400).send({ error: error.message})
 });
+
+router.delete('/users/me/avatar', auth, async (req, res) => {
+    req.user.avatar = undefined;
+    await req.user.save();
+    res.send();
+})
 
 
 module.exports = router;
